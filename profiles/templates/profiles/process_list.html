@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h1>Processes</h1>
+  <table>
+    <tr>
+        <th>Name</th>
+        <th>File Location</th>
+        <th>Delete</th>
+    </tr>
+    {% for process in object_list %}
+    <tr>
+        <td><a href="{% url "profiles:process_edit" process.id %}">{{ process.name }}</a></td>
+        <td> {{ process.raw_file }}
+        <td><a href="{% url "profiles:process_delete" process.id %}">X</a></td>
+    </td>
+  {% endfor %}
+  </table>
+  <br>
+  <a href="{% url "profiles:process_new" %}">Create New Process</a>
+{% endblock %}
