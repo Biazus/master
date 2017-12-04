@@ -5,7 +5,7 @@ from django.core.urlresolvers import reverse_lazy
 from django.views import View
 from django.shortcuts import redirect, render
 
-from .models import Process
+from .models import Process, Task
 from .services import ServicesProfiles
 
 # def process_upload(request):
@@ -56,7 +56,7 @@ class TasksEdit(View):
     form_class = TaskFormSet
 
     def get(self, request, *args, **kwargs):
-        form = self.form_class()
+        form = self.form_class(queryset=Task.objects.filter(process_id=kwargs.pop('pk')))
         return render(request, self.template, {'form': form})
 
     def post(self, request, *args, **kwargs):

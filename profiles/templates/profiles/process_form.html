@@ -3,10 +3,14 @@
   <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
-    {% for obj in form.instance.task_set.all %}
-        {{ obj.label }}
+    {% if form.instance.task_set.all %}
+        <a href="{% url 'profiles:tasks_edit' pk=form.instance.id %}">Tasks</a>
+        {% for obj in form.instance.task_set.all %}
+            <br>
+            {{ obj.label }}
+        {% endfor %}
         <br>
-    {% endfor %}
+    {% endif %}
     <button type="submit">Submit!</button>
   </form>
 {% endblock %}
