@@ -7,7 +7,10 @@
         <a href="{% url 'profiles:tasks_edit' pk=form.instance.id %}">Tasks</a>
         {% for obj in form.instance.task_set.all %}
             <br>
-            {{ obj.label }}
+            LABEL: {{ obj.label }}
+            <br>
+            TYPE: {{ obj.task_type }}
+            <br>
         {% endfor %}
         <br>
     {% endif %}

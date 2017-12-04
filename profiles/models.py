@@ -35,6 +35,7 @@ class Task(models.Model):
     SEND_TASK = 'send'
     BUSINESS_RULE_TASK = 'business_rule'
     SCRIPT_TASK = 'script'
+    TASK = 'task'
 
     TASK_TYPES = (
         (USER_TASK, 'User Task'),
@@ -43,6 +44,7 @@ class Task(models.Model):
         (SEND_TASK, 'Send Task'),
         (BUSINESS_RULE_TASK, 'Business Rule Task'),
         (SCRIPT_TASK, 'Script Task'),
+        (TASK, 'Task'),
     )
 
     label = models.CharField(verbose_name='Label', max_length=256)

@@ -4,18 +4,28 @@ from .models import Task
 
 class ServicesProfiles(object):
 
-    def parse_file(self, raw_file):
-        # import pdb;
-        # pdb.set_trace()
-        tree = ET.parse(raw_file)
+    def parse_file(self, instance):
+        task_strings = ['task', 'Task']
+        tree = ET.parse(instance.raw_file)
         root = tree.getroot()
         for child in root:
             for subchild in child:
-                if "task" in subchild.tag:
-                    self._save_task(subchild.tag, subchild.attrib)
-        return raw_file
+                if any(string in subchild.tag for string in task_strings):
+                    print(subchild.attrib)
+                    self._save_task(subchild.tag, subchild.attrib, instance)
+        return instance.raw_file
 
-    def _save_task(self, tag, attrib):
-        label = 'Teste'
-        task_type = Task.USER_TASK
-        Task.objects.create(label=label, task_type=task_type)
+    def _save_task(self, tag, attrib, instance):
+        task_types_map = {
+                'businessRuleTask': Task.BUSINESS_RULE_TASK,
+                'userTask': Task.USER_TASK,
+                'scriptTask': Task.SCRIPT_TASK,
+                'serviceTask': Task.SERVICE_TASK,
+                'sendTask': Task.SEND_TASK,
+                'receiveTask': Task.RECEIVE_TASK,
+                'task': Task.TASK
+                }
+
+        task_type = task_types_map[tag.split('}',1)[1]]
+        label = attrib['name']
+        Task.objects.create(label=label, task_type=task_type, process=instance)

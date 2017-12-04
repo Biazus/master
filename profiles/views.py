@@ -36,8 +36,9 @@ class ProcessCreate(CreateView):
     fields = ['name', 'raw_file', 'organization']
 
     def form_valid(self, form):
-        form.instance.structure = ServicesProfiles.parse_file(form.instance.raw_file)
-        return super(ProcessCreate, self).form_valid(form)
+        response = super(ProcessCreate, self).form_valid(form)
+        ServicesProfiles().parse_file(form.instance)
+        return response
 
 
 class ProcessUpdate(UpdateView):
