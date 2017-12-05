@@ -1,6 +1,9 @@
 {% extends 'base.html' %}
 {% block content %}
   <h1>Organizations</h1>
+  <a href="{% url "profiles:organization_new" %}" class="btn btn-primary">Create New Organization</a>
+  <br>
+  <br>
   <table class="table table-striped">
     <tr>
         <th>Name</th>
@@ -14,5 +17,4 @@
   {% endfor %}
   </table>
   <br>
-  <a href="{% url "profiles:organization_new" %}" class="btn btn-primary">Create New Organization</a>
 {% endblock %}

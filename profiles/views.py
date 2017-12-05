@@ -8,23 +8,6 @@ from django.shortcuts import redirect, render
 from .models import Process, Task, Organization
 from .services import ServicesProfiles
 
-# def process_upload(request):
-#     message = ''
-#     if request.method == 'POST':
-#         form = ProcessForm(request.POST, request.FILES)
-#         if form.is_valid():
-#             form.save()
-#             message = 'Sucess!'
-#         else:
-#             message = 'There was an error on your request.'
-#     else:
-#         form = ProcessForm()
-#
-#     return render(request, 'process.html', {
-#         'form': form,
-#         'feedback_to_user': message
-#     })
-
 
 class ProcessList(ListView):
     model = Process

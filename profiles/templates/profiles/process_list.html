@@ -1,6 +1,9 @@
 {% extends 'base.html' %}
 {% block content %}
   <h1>Processes</h1>
+  <a href="{% url "profiles:process_new" %}" class="btn btn-primary">Create New Process</a>
+  <br>
+  <br>
   <table class="table table-striped">
     <tr>
         <th>Name</th>
@@ -18,5 +21,4 @@
   {% endfor %}
   </table>
   <br>
-  <a href="{% url "profiles:process_new" %}" class="btn btn-primary">Create New Process</a>
 {% endblock %}

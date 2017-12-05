@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h1>Products</h1>
+  <a href="{% url "resources:product_new" %}" class="btn btn-primary">Create New Product</a>
+  <br>
+  <br>
+  <table class="table table-striped">
+    <tr>
+        <th>Name</th>
+        <th>Price</th>
+        <th>Delete</th>
+    </tr>
+    {% for product in object_list %}
+    <tr>
+        <td><a href="{% url "resources:product_edit" product.id %}">{{ product.name }}</a></td>
+        <td> R${{ product.price}}
+        <td><a href="{% url "resources:product_delete" product.id %}">X</a></td>
+    </tr>
+  {% endfor %}
+  </table>
+  <br>
+{% endblock %}
