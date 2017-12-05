@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block content %}
+<form method="post">{% csrf_token %}
+    Are you sure you want to delete the organization "{{ object.name }}" ?
+    <br>
+    <input type="submit" value="Yes, delete it" />
+    <a class="btn btn-primary" href="{% url "profiles:organization_list" %}" >Cancel</a>
+</form>
+{% endblock content %}

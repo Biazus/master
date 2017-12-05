@@ -7,6 +7,9 @@ class Organization(models.Model):
     def __unicode__(self):
         return self.name
 
+    def __str__(self):
+        return self.name
+
 
 class Process(models.Model):
     name = models.CharField(verbose_name='Name', max_length=30,)
@@ -14,14 +17,14 @@ class Process(models.Model):
         Organization,
         verbose_name='Organization',
         blank=True,
-        null=True
+        null=True,
+        on_delete=models.SET_NULL
     )
     upload_date = models.DateTimeField(
         verbose_name='Upload Date',
         auto_now_add=True
     )
     raw_file = models.FileField(upload_to='uploads/')
-    # structure = models.JSONField(verbose_name='JSON Representation')
 
     def __unicode__(self):
         return self.name

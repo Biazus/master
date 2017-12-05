@@ -5,7 +5,7 @@ from django.core.urlresolvers import reverse_lazy
 from django.views import View
 from django.shortcuts import redirect, render
 
-from .models import Process, Task
+from .models import Process, Task, Organization
 from .services import ServicesProfiles
 
 # def process_upload(request):
@@ -50,6 +50,27 @@ class ProcessUpdate(UpdateView):
 class ProcessDelete(DeleteView):
     model = Process
     success_url = reverse_lazy('profiles:process_list')
+
+
+class OrganizationCreate(CreateView):
+    model = Organization
+    success_url = reverse_lazy('profiles:organization_list')
+    fields = ['name']
+
+
+class OrganizationList(ListView):
+    model = Organization
+
+
+class OrganizationUpdate(UpdateView):
+    model = Organization
+    success_url = reverse_lazy('profiles:organization_list')
+    fields = ['name']
+
+
+class OrganizationDelete(DeleteView):
+    model = Organization
+    success_url = reverse_lazy('profiles:organization_list')
 
 
 class TasksEdit(View):

@@ -1,19 +1,25 @@
 {% extends 'base.html' %}
 {% block content %}
+<h1>Process "{{form.instance.name}}"</h1>
   <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
-    {% if form.instance.task_set.all %}
-        <a href="{% url 'profiles:tasks_edit' pk=form.instance.id %}">Tasks</a>
-        {% for obj in form.instance.task_set.all %}
-            <br>
-            LABEL: {{ obj.label }}
-            <br>
-            TYPE: {{ obj.task_type }}
-            <br>
-        {% endfor %}
-        <br>
-    {% endif %}
-    <button type="submit">Submit!</button>
+    <button class="btn btn-primary" type="submit">Submit!</button>
   </form>
+    {% if form.instance.task_set.all %}
+        <h3> Tasks </h3>
+      <table class="table table-striped">
+        <tr>
+            <th>Label</th>
+            <th>Type</th>
+        </tr>
+        {% for obj in form.instance.task_set.all %}
+        <tr>
+            <td>{{ obj.label }}</td>
+            <td>{{ obj.task_type }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+        <a href="{% url 'profiles:tasks_edit' pk=form.instance.id %}">Edit process tasks</a>
+    {% endif %}
 {% endblock %}

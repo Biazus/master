@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h1>Organizations</h1>
+  <table class="table table-striped">
+    <tr>
+        <th>Name</th>
+        <th>Delete</th>
+    </tr>
+    {% for org in object_list %}
+    <tr>
+        <td><a href="{% url "profiles:organization_edit" org.id %}">{{ org.name }}</a></td>
+        <td><a href="{% url "profiles:organization_delete" org.id %}">X</a></td>
+    </tr>
+  {% endfor %}
+  </table>
+  <br>
+  <a href="{% url "profiles:organization_new" %}" class="btn btn-primary">Create New Organization</a>
+{% endblock %}
