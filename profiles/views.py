@@ -38,7 +38,7 @@ class ProcessDelete(DeleteView):
 class OrganizationCreate(CreateView):
     model = Organization
     success_url = reverse_lazy('profiles:organization_list')
-    fields = ['name']
+    fields = ['name', 'suite']
 
 
 class OrganizationList(ListView):
@@ -48,7 +48,7 @@ class OrganizationList(ListView):
 class OrganizationUpdate(UpdateView):
     model = Organization
     success_url = reverse_lazy('profiles:organization_list')
-    fields = ['name']
+    fields = ['name', 'suite']
 
 
 class OrganizationDelete(DeleteView):

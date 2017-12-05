@@ -3,7 +3,9 @@ from django.db import models
 
 class Organization(models.Model):
     name = models.CharField(verbose_name='Name', max_length=30,)
-    #suite = models.ManyToMany(verbose_name='Application Suite')
+    suite = models.ManyToManyField(
+        'resources.Product', verbose_name='Application Suite', blank=True,
+    )
 
     def __unicode__(self):
         return self.name
