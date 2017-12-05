@@ -23,9 +23,10 @@ class ServicesProfiles(object):
                 'serviceTask': Task.SERVICE_TASK,
                 'sendTask': Task.SEND_TASK,
                 'receiveTask': Task.RECEIVE_TASK,
-                'task': Task.TASK
+                'task': Task.TASK,
+                'manualTask': Task.MANUAL_TASK
                 }
 
-        task_type = task_types_map[tag.split('}',1)[1]]
+        task_type = task_types_map[tag.split('}', 1)[1]]
         label = attrib['name']
         Task.objects.create(label=label, task_type=task_type, process=instance)

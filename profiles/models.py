@@ -36,6 +36,7 @@ class Task(models.Model):
     BUSINESS_RULE_TASK = 'business_rule'
     SCRIPT_TASK = 'script'
     TASK = 'task'
+    MANUAL_TASK = 'manual'
 
     TASK_TYPES = (
         (USER_TASK, 'User Task'),
