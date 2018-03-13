@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h1>Resource Types</h1>
+  <a href="{% url "resources:resource_type_new" %}" class="btn btn-primary">Create New Resource Type</a>
+  <br>
+  <br>
+  <table class="table table-striped">
+    <tr>
+        <th>Name</th>
+        <th>Delete</th>
+    </tr>
+    {% for resource_type in object_list %}
+    <tr>
+        <td><a href="{% url "resources:resource_type_edit" resource_type.id %}">{{ resource_type.name }}</a></td>
+        <td><a href="{% url "resources:resource_type_delete" resource_type.id %}">X</a></td>
+    </tr>
+  {% endfor %}
+  </table>
+  <br>
+{% endblock %}
+

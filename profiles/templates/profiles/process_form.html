@@ -12,11 +12,13 @@
         <tr>
             <th>Label</th>
             <th>Type</th>
+            <th>Application Type</th>
         </tr>
         {% for obj in form.instance.task_set.all %}
         <tr>
             <td>{{ obj.label }}</td>
             <td>{{ obj.task_type }}</td>
+            <td>{{ obj.application_type|default:''}}</td>
         </tr>
         {% endfor %}
     </table>

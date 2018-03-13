@@ -1,5 +1,7 @@
 from django.db import models
 
+from resources.models import ResourceType
+
 
 class Organization(models.Model):
     name = models.CharField(verbose_name='Name', max_length=30,)
@@ -15,7 +17,7 @@ class Organization(models.Model):
 
 
 class Process(models.Model):
-    name = models.CharField(verbose_name='Name', max_length=30,)
+    name = models.CharField(verbose_name='Name', max_length=255,)
     organization = models.ForeignKey(
         Organization,
         verbose_name='Organization',
@@ -57,3 +59,6 @@ class Task(models.Model):
     label = models.CharField(verbose_name='Label', max_length=256)
     task_type = models.CharField(verbose_name='Type', choices=TASK_TYPES, max_length=20,)
     process = models.ForeignKey(Process, verbose_name='Task', on_delete=models.CASCADE)
+    application_type = models.ForeignKey(
+        ResourceType, verbose_name='Application Type', on_delete=models.SET_NULL, null=True
+    )
