@@ -60,5 +60,9 @@ class Task(models.Model):
     task_type = models.CharField(verbose_name='Type', choices=TASK_TYPES, max_length=20,)
     process = models.ForeignKey(Process, verbose_name='Task', on_delete=models.CASCADE)
     application_type = models.ForeignKey(
-        ResourceType, verbose_name='Application Type', on_delete=models.SET_NULL, null=True
+        ResourceType, verbose_name='Application Type', on_delete=models.SET_NULL, null=True, blank=True,
+    )
+    recommended_app = models.ForeignKey(
+        ResourceType, verbose_name='Recommended App', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='predicted_tasks'
     )

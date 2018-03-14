@@ -29,6 +29,13 @@ class ProcessUpdate(UpdateView):
     success_url = reverse_lazy('profiles:process_list')
     fields = ['name', 'organization']
 
+    def post(self, request, *args, **kwargs):
+        instance = Process.objects.get(id=kwargs.get('pk'))
+        if 'recommend' in request.POST:
+            service = ServicesProfiles()
+            service.recommend(instance)
+        return redirect('profiles:process_list')
+
 
 class ProcessDelete(DeleteView):
     model = Process

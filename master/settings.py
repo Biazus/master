@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'core',
     'profiles',
     'resources',
+    'analysis',
 ]
 
 MIDDLEWARE = [

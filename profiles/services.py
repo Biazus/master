@@ -1,5 +1,6 @@
 import xml.etree.ElementTree as ET
 from .models import Task
+from resources.models import ResourceType
 
 
 class ServicesProfiles(object):
@@ -30,3 +31,19 @@ class ServicesProfiles(object):
         task_type = task_types_map[tag.split('}', 1)[1]]
         label = attrib['name']
         Task.objects.create(label=label, task_type=task_type, process=instance)
+
+    def recommend(self, instance):
+        priori_resource_types = {
+            'no_resource': 0
+        }
+        total_docs = 0
+        for resource in ResourceType.objects.all():
+            task_count = resource.task_set.all().count()
+            total_docs = total_docs + task_count
+            priori_resource_types[resource.name] = task_count
+
+        for row in priori_resource_types:
+            priori_resource_types[row] = priori_resource_types[row] / task_count
+
+        # limpar dados? artigos, minusculas etc
+        # calcular likelihood

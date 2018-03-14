@@ -7,4 +7,5 @@ urlpatterns = [
     url(r'^core/', include('core.urls')),
     url(r'^profiles/', include('profiles.urls', namespace='profiles')),
     url(r'^resources/', include('resources.urls', namespace='resources')),
+    url(r'^analysis/', include('resources.urls', namespace='analysis')),
 ]
