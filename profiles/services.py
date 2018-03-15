@@ -1,9 +1,15 @@
+import unidecode
 import xml.etree.ElementTree as ET
+from nltk.stem import RSLPStemmer
+from nltk.corpus import stopwords
 from .models import Task
 from resources.models import ResourceType
 
 
 class ServicesProfiles(object):
+
+    stopwords = set(stopwords.words('portuguese'))
+    porter = RSLPStemmer()
 
     def parse_file(self, instance):
         task_strings = ['task', 'Task']
@@ -45,5 +51,34 @@ class ServicesProfiles(object):
         for row in priori_resource_types:
             priori_resource_types[row] = priori_resource_types[row] / task_count
 
-        # limpar dados? artigos, minusculas etc
+        all_labels = {'undefined': []}  # dicionario com as labels de cada task por resource type
+        for process in instance.organization.process_set.all():
+            for task in process.task_set.all():
+                cleaned_label = self.clean_label(task.label)
+                application_name = task.application_type.name if task.application_type else 'undefined'
+                all_labels.setdefault(application_name, [])
+                all_labels[application_name] = all_labels[application_name] + cleaned_label
+
+        set_labels = {}
+        for i in all_labels:
+            # cria set a partir das palavras de cada resource type
+            set_labels.setdefault(i, set())
+            set_labels[i] = set(all_labels[i])
+
+        print(all_labels)
+        print(set_labels)
+        # transformar lista em set
         # calcular likelihood
+
+    def clean_label(self, label):
+        '''
+            Returns a list of the words that compose the provided label
+        '''
+        list_of_words = []
+        for word in label.split():
+            stemmed_word = self.porter.stem(word.lower())
+            new_word = unidecode.unidecode(stemmed_word).replace('-', '')
+            # TODO alterar labels com numeros (ex. 1o, 2o)
+            if new_word not in self.stopwords:
+                list_of_words.append(new_word)
+        return list_of_words
