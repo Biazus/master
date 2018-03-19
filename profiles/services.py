@@ -86,10 +86,30 @@ class ServicesProfiles(object):
                 number_unique_words_all_docs = len(set_of_unique_words_all_docs)
                 prob_condit[resource][word] = p_word/(number_of_all_words_in_category+number_unique_words_all_docs)
 
+        # print(prob_condit)
+        self.classify_process(instance, prob_condit)
 
-        print(prob_condit)
+    def classify_process(self, instance, prob_condit):
+        probability = {}
+        for task in instance.task_set.all():
+            probability[task.label] = {}
+            for app_class in prob_condit:
+                label = self.clean_label(task.label)
+                probability[task.label][app_class] = 1
+                for word in label:
+                    probability[task.label][app_class] = probability[task.label][app_class] * prob_condit[app_class][word]
+                # print('{} em {}: {}'.format(task.label, app_class, probability[task.label][app_class]))
 
-        # CALCULATE PROB
+        for label in probability:
+            max_val = 0
+            class_value = ''
+            for app in probability[label]:
+                if probability[label][app] > max_val:
+                    max_val = probability[label][app]
+                    class_value = app
+            print('{}: {}'.format(label, class_value))
+
+
 
     def clean_label(self, label):
         '''
