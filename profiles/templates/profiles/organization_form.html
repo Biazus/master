@@ -8,5 +8,8 @@
 </form>
 {% if form.instance.id %}
     <a href="{% url "profiles:cross_validation" form.instance.id %}" class="btn " >Cross Fold Validation</a>
+    {% if form.instance.accuracy %}
+        {{ form.instance.accuracy }}
+    {% endif %}
 {% endif %}
 {% endblock %}

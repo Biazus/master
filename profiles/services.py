@@ -88,7 +88,7 @@ class ServicesProfiles(object):
                 number_unique_words_all_docs = len(set_of_unique_words_all_docs)
                 prob_condit[resource][word] = p_word/(number_of_all_words_in_category+number_unique_words_all_docs)
 
-        # print(prob_condit)
+        print(prob_condit)
         self.classify_process(test, prob_condit)
 
     def classify_process(self, test, prob_condit):
@@ -106,17 +106,18 @@ class ServicesProfiles(object):
             max_val = 0
             class_value = ''
             for app in probability[label]:
+                # TODO aqui necessario colocar um threshold para nao pegar qlqr label
                 if probability[label][app] > max_val:
                     max_val = probability[label][app]
                     class_value = app
             if class_value != '' and class_value != 'undefined':
-                tasks_to_update = [task for task in test if task.label==label]
+                tasks_to_update = [task for task in test if task.label == label]
+                # cleanup para checar se task é um servico
+                tasks_to_update = [task for task in tasks_to_update if task.task_type != 'service']
                 for task in tasks_to_update:
-                    task.recommended_app=ResourceType.objects.get(name=class_value)
+                    task.recommended_app = ResourceType.objects.get(name=class_value)
                     task.save()
             # print('{}: {}'.format(label, class_value))
-
-
 
     def clean_label(self, label):
         '''
@@ -131,24 +132,25 @@ class ServicesProfiles(object):
                 list_of_words.append(new_word)
         return list_of_words
 
-
     def cross_validation(self, organization_pk):
-        all_tasks = Task.objects.filter(process__organization__id=organization_pk)
+        all_tasks = Task.objects.filter(process__organization__id=organization_pk).order_by('?')
+        all_tasks.update(recommended_app=None)
         p = Paginator(all_tasks, math.ceil(len(all_tasks)/10))
-        for i in range(10): #
-            match = 0
-            mismatch = 0
+        matches = 0
+        mismatches = 0
+        for i in range(10):
             page = p.page(i+1)
             test = page.object_list
             training = all_tasks.filter(~Q(id__in=[task.id for task in test]))
             self.recommend(test, training)
             for t in test:
-                # print('{:20}  {:20}  {:20}'.format(t.label, t.application_type, t.recommended_app))
                 print('%-60s%-25s%-25s' % (t.label, t.application_type, t.recommended_app))
                 if t.recommended_app == t.application_type:
-                    match = match + 1
+                    matches = matches + 1
                 else:
-                    mismatch = mismatch + 1
-            print(match)
-            print(mismatch)
-            print()
+                    mismatches = mismatches + 1
+        accuracy = matches/(matches+mismatches)
+        # print('Matches: {}'.format(matches))
+        # print('Mismatches: {}'.format(mismatches))
+        # print('Accuracy: {}'.format(accuracy))
+        return accuracy

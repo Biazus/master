@@ -8,6 +8,7 @@ class Organization(models.Model):
     suite = models.ManyToManyField(
         'resources.Product', verbose_name='Application Suite', blank=True,
     )
+    accuracy = models.FloatField('Accuracy', blank=True, null=True,)
 
     def __unicode__(self):
         return self.name

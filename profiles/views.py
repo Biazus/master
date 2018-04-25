@@ -71,8 +71,11 @@ class CrossValidation(View):
     def get(self, request, *args, **kwargs):
         service = ServicesProfiles()
         pk = kwargs.get('pk')
-        service.cross_validation(pk)
-        return HttpResponse('Hello, World!')
+        accuracy = service.cross_validation(pk)
+        org = Organization.objects.get(id=pk)
+        org.accuracy = accuracy
+        org.save()
+        return redirect('profiles:organization_edit', pk=pk)
 
 
 class TasksEdit(View):
@@ -87,5 +90,5 @@ class TasksEdit(View):
         form = self.form_class(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('profiles:process_list')
+            return redirect('profiles:process_edit', pk=self.kwargs.get('pk'))
         return render(request, self.template, {'form': form})
