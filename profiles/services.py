@@ -43,27 +43,26 @@ class ServicesProfiles(object):
         label = attrib['name']
         Task.objects.create(label=label, task_type=task_type, process=instance)
 
-    def recommend(self, instance):
+    def recommend(self, test, training):
 
         # calculate priori probability
         priori_prob_by_resource_types = {}
         for resource in ResourceType.objects.all():
-            resource_task_count = resource.task_set.filter(process__organization=instance.organization).count()
+            resource_task_count = resource.task_set.filter(id__in=[i.id for i in training]).count()
             priori_prob_by_resource_types[resource.name] = resource_task_count
 
-        task_count = Task.objects.filter(process__organization=instance.organization).count()
-        tasks_without_resource = Task.objects.filter(process__organization=instance.organization, application_type=None).count()
+        task_count = len(training)
+        tasks_without_resource = len([task for task in training if task.application_type is None])
         for row in priori_prob_by_resource_types:
             priori_prob_by_resource_types[row] = priori_prob_by_resource_types[row] / task_count
         priori_prob_by_resource_types['no_resources'] = tasks_without_resource/task_count
 
         all_words_from_a_resource = {'undefined': []}
-        for process in instance.organization.process_set.all().exclude(id=instance.id):
-            for task in process.task_set.all():
-                cleaned_label = self.clean_label(task.label)
-                application_name = task.application_type.name if task.application_type else 'undefined'
-                all_words_from_a_resource.setdefault(application_name, [])
-                all_words_from_a_resource[application_name] = all_words_from_a_resource[application_name] + cleaned_label
+        for task in training:
+            cleaned_label = self.clean_label(task.label)
+            application_name = task.application_type.name if task.application_type else 'undefined'
+            all_words_from_a_resource.setdefault(application_name, [])
+            all_words_from_a_resource[application_name] = all_words_from_a_resource[application_name] + cleaned_label
 
         set_of_unique_words_all_docs = set()
         for i in all_words_from_a_resource:
@@ -71,7 +70,7 @@ class ServicesProfiles(object):
             set_of_unique_words_all_docs.update(all_words_from_a_resource[i])
 
         # adiciona as palavras do processo passado como instancia para o set
-        for task in instance.task_set.all():
+        for task in test:
             set_of_unique_words_all_docs.update(self.clean_label(task.label))
 
         # calcular likelihood
@@ -90,11 +89,11 @@ class ServicesProfiles(object):
                 prob_condit[resource][word] = p_word/(number_of_all_words_in_category+number_unique_words_all_docs)
 
         # print(prob_condit)
-        self.classify_process(instance, prob_condit)
+        self.classify_process(test, prob_condit)
 
-    def classify_process(self, instance, prob_condit):
+    def classify_process(self, test, prob_condit):
         probability = {}
-        for task in instance.task_set.all():
+        for task in test:
             probability[task.label] = {}
             for app_class in prob_condit:
                 label = self.clean_label(task.label)
@@ -111,9 +110,10 @@ class ServicesProfiles(object):
                     max_val = probability[label][app]
                     class_value = app
             if class_value != '' and class_value != 'undefined':
-                import pdb;pdb.set_trace()
-                tasks_to_update = instance.task_set.all().filter(label=label)
-                tasks_to_update.update(recommended_app=ResourceType.objects.get(name=class_value))
+                tasks_to_update = [task for task in test if task.label==label]
+                for task in tasks_to_update:
+                    task.recommended_app=ResourceType.objects.get(name=class_value)
+                    task.save()
             # print('{}: {}'.format(label, class_value))
 
 
@@ -136,6 +136,19 @@ class ServicesProfiles(object):
         all_tasks = Task.objects.filter(process__organization__id=organization_pk)
         p = Paginator(all_tasks, math.ceil(len(all_tasks)/10))
         for i in range(10): #
+            match = 0
+            mismatch = 0
             page = p.page(i+1)
             test = page.object_list
             training = all_tasks.filter(~Q(id__in=[task.id for task in test]))
+            self.recommend(test, training)
+            for t in test:
+                # print('{:20}  {:20}  {:20}'.format(t.label, t.application_type, t.recommended_app))
+                print('%-60s%-25s%-25s' % (t.label, t.application_type, t.recommended_app))
+                if t.recommended_app == t.application_type:
+                    match = match + 1
+                else:
+                    mismatch = mismatch + 1
+            print(match)
+            print(mismatch)
+            print()
