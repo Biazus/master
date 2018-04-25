@@ -1,3 +1,4 @@
+from django.http import HttpResponse
 from .forms import TaskFormSet
 from django.views.generic import ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
@@ -61,6 +62,14 @@ class OrganizationUpdate(UpdateView):
 class OrganizationDelete(DeleteView):
     model = Organization
     success_url = reverse_lazy('profiles:organization_list')
+
+
+class CrossValidation(View):
+    def get(self, request, *args, **kwargs):
+        service = ServicesProfiles()
+        pk = kwargs.get('pk')
+        service.cross_validation(pk)
+        return HttpResponse('Hello, World!')
 
 
 class TasksEdit(View):

@@ -1,9 +1,12 @@
 {% extends 'base.html' %}
 {% block content %}
 <h1>Organization "{{form.instance.name}}"</h1>
-  <form method="post">
+<form method="post">
     {% csrf_token %}
     {{ form.as_p }}
     <button class="btn btn-primary" type="submit">Submit!</button>
-  </form>
+</form>
+{% if form.instance.id %}
+    <a href="{% url "profiles:cross_validation" form.instance.id %}" class="btn " >Cross Fold Validation</a>
+{% endif %}
 {% endblock %}

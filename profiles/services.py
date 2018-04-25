@@ -1,9 +1,13 @@
+import math
 import unidecode
 import copy
 import xml.etree.ElementTree as ET
 from nltk.stem import RSLPStemmer
 from nltk.corpus import stopwords
 from .models import Task
+
+from django.db.models import Q
+from django.core.paginator import Paginator
 from resources.models import ResourceType
 
 
@@ -52,7 +56,6 @@ class ServicesProfiles(object):
         for row in priori_prob_by_resource_types:
             priori_prob_by_resource_types[row] = priori_prob_by_resource_types[row] / task_count
         priori_prob_by_resource_types['no_resources'] = tasks_without_resource/task_count
-
 
         all_words_from_a_resource = {'undefined': []}
         for process in instance.organization.process_set.all().exclude(id=instance.id):
@@ -107,7 +110,11 @@ class ServicesProfiles(object):
                 if probability[label][app] > max_val:
                     max_val = probability[label][app]
                     class_value = app
-            print('{}: {}'.format(label, class_value))
+            if class_value != '' and class_value != 'undefined':
+                import pdb;pdb.set_trace()
+                tasks_to_update = instance.task_set.all().filter(label=label)
+                tasks_to_update.update(recommended_app=ResourceType.objects.get(name=class_value))
+            # print('{}: {}'.format(label, class_value))
 
 
 
@@ -123,3 +130,12 @@ class ServicesProfiles(object):
             if new_word not in self.stopwords:
                 list_of_words.append(new_word)
         return list_of_words
+
+
+    def cross_validation(self, organization_pk):
+        all_tasks = Task.objects.filter(process__organization__id=organization_pk)
+        p = Paginator(all_tasks, math.ceil(len(all_tasks)/10))
+        for i in range(10): #
+            page = p.page(i+1)
+            test = page.object_list
+            training = all_tasks.filter(~Q(id__in=[task.id for task in test]))

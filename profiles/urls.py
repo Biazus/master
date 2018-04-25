@@ -12,5 +12,6 @@ urlpatterns = [
     url(r'^organization/new$', views.OrganizationCreate.as_view(), name='organization_new'),
     url(r'^organization/edit/(?P<pk>\d+)$', views.OrganizationUpdate.as_view(), name='organization_edit'),
     url(r'^organization/delete/(?P<pk>\d+)$', views.OrganizationDelete.as_view(), name='organization_delete'),
+    url(r'^organization/validation/(?P<pk>\d+)$', views.CrossValidation.as_view(), name='cross_validation'),
 
 ]
