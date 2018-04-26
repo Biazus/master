@@ -55,6 +55,7 @@ class Task(models.Model):
         (BUSINESS_RULE_TASK, 'Business Rule Task'),
         (SCRIPT_TASK, 'Script Task'),
         (TASK, 'Task'),
+        (MANUAL_TASK, 'Manual Task'),
     )
 
     label = models.CharField(verbose_name='Label', max_length=256)

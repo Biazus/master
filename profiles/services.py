@@ -4,6 +4,8 @@ import copy
 import xml.etree.ElementTree as ET
 from nltk.stem import RSLPStemmer
 from nltk.corpus import stopwords
+from random import shuffle
+
 from .models import Task
 
 from django.db.models import Q
@@ -70,7 +72,7 @@ class ServicesProfiles(object):
             set_of_unique_words_all_docs.update(all_words_from_a_resource[i])
 
         # adiciona as palavras do processo passado como instancia para o set
-        for task in test:
+        for task in training:
             set_of_unique_words_all_docs.update(self.clean_label(task.label))
 
         # calcular likelihood
@@ -83,23 +85,31 @@ class ServicesProfiles(object):
         prob_condit = copy.deepcopy(word_counter)
         for resource in prob_condit:
             for word in set_of_unique_words_all_docs:
-                p_word = prob_condit[resource][word]+1 if word in prob_condit[resource] else 1
+                p_word = prob_condit[resource][word]+1 if word in prob_condit[resource] else 1 # laplace smoothing
                 number_of_all_words_in_category = len(all_words_from_a_resource[resource])
                 number_unique_words_all_docs = len(set_of_unique_words_all_docs)
                 prob_condit[resource][word] = p_word/(number_of_all_words_in_category+number_unique_words_all_docs)
 
         print(prob_condit)
-        self.classify_process(test, prob_condit)
+        self.classify_process(test, prob_condit, set_of_unique_words_all_docs)
 
-    def classify_process(self, test, prob_condit):
+    def classify_process(self, test, prob_condit, set_of_unique_words_all_docs):
         probability = {}
         for task in test:
             probability[task.label] = {}
             for app_class in prob_condit:
                 label = self.clean_label(task.label)
                 probability[task.label][app_class] = 1
-                for word in label:
-                    probability[task.label][app_class] = probability[task.label][app_class] * prob_condit[app_class][word]
+
+                # testa se palavras existem no vocabulario. se nenhuma existe coloca 0 de prob
+                existent_words = [ i for i in label if i in set_of_unique_words_all_docs]
+                if len(existent_words) == 0:
+                    probability[task.label][app_class] = 0
+
+                else:
+                    for word in label:
+                        if word in prob_condit[app_class]:
+                            probability[task.label][app_class] = probability[task.label][app_class] * prob_condit[app_class][word]
                 # print('{} em {}: {}'.format(task.label, app_class, probability[task.label][app_class]))
 
         for label in probability:
@@ -113,7 +123,8 @@ class ServicesProfiles(object):
             if class_value != '' and class_value != 'undefined':
                 tasks_to_update = [task for task in test if task.label == label]
                 # cleanup para checar se task é um servico
-                tasks_to_update = [task for task in tasks_to_update if task.task_type != 'service']
+                tasks_to_update = [task for task in tasks_to_update if task.task_type != 'service' and
+                        task.task_type != 'manual']
                 for task in tasks_to_update:
                     task.recommended_app = ResourceType.objects.get(name=class_value)
                     task.save()
