@@ -5,7 +5,7 @@
     {% csrf_token %}
     {{ form.as_p }}
     <button class="btn btn-primary" type="submit">Submit!</button>
-    <button class="btn btn-primary" type="submit" name="classify_tasks">Classify Tasks</button>
+    <button class="btn btn-primary" type="submit" name="classify">Classify Tasks</button>
   </form>
     {% if form.instance.task_set.all %}
         <h3> Tasks </h3>

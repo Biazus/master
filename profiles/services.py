@@ -47,10 +47,15 @@ class ServicesProfiles(object):
         label = attrib['name']
         Task.objects.create(label=label, task_type=task_type, process=instance)
 
-    def classify_tasks(self, test, training):
+    def _get_probability_by_resource(self, training):
+        """
+        Args:
+            training (list): Lista de treinamento
 
-        """priori_prob_by_resource_types = dicionario que ira conter a probabilidade a priori de uma
-        palavra estar contida em um tipo de recurso """
+        Returns:
+            dict: dicionario que ira conter a probabilidade a priori de uma palavra estar contida em um tipo
+            de recurso
+        """
         priori_prob_by_resource_types = {}
         for resource in ResourceType.objects.all():
             resource_task_count = resource.task_set.filter(id__in=[i.id for i in training]).count()
@@ -61,45 +66,80 @@ class ServicesProfiles(object):
         for row in priori_prob_by_resource_types:
             priori_prob_by_resource_types[row] = priori_prob_by_resource_types[row] / task_count
         priori_prob_by_resource_types['undefined'] = tasks_without_resource/task_count
+        return priori_prob_by_resource_types
 
-        """all_words_from_a_resource = dicionario contendo, para cada um dos tipos de recurso R, as palavras -
-        ja limpas - contidas dentro das tarefas de R"""
+    def _get_all_words_from_each_resource(self, training):
+        """
+        Returns:
+            dict: dicionario contendo, para cada um dos tipos de recurso, as palavras contidas dentro das
+            tarefas do tipo de recurso
+        """
         all_words_from_a_resource = {'undefined': []}
         for task in training:
-            cleaned_label = self.clean_label(task.label)
+            cleaned_label = self._clean_label(task.label)
             application_name = task.application_type.name if task.application_type else 'undefined'
             all_words_from_a_resource.setdefault(application_name, [])
             all_words_from_a_resource[application_name] = all_words_from_a_resource[application_name] + cleaned_label
+        return all_words_from_a_resource
 
-        """set_of_unique_words_all_docs = set de todas as palavras dos processos da organizacao"""
-        set_of_unique_words_all_docs = set()
-        for i in all_words_from_a_resource:
-            set_of_unique_words_all_docs.update(all_words_from_a_resource[i])
-
-        """word_counter = numero de vezes em que uma dada palavra aparece para um tipo de recurso especifico"""
+    def _get_word_counter_by_resource_type(self, all_words_from_a_resource):
+        """
+        Returns:
+            dict: dicionario com numero de vezes que uma dada palavra aparece para um recurso especifico
+        """
         word_counter = {}
         for resource in all_words_from_a_resource:
             word_counter[resource] = {}
             for word in all_words_from_a_resource[resource]:
                 word_counter[resource][word] = all_words_from_a_resource[resource].count(word)
+        return word_counter
 
-        """prob_condit = probabilidade condicional / likelihood de uma palavra para um dado tipo de recurso"""
-        prob_condit = copy.deepcopy(word_counter)
+    def _calculate_likelihood(self, prob_condit, set_of_unique_words_all_docs, number_unique_words_all_docs,
+            all_words_from_a_resource):
+        """
+            Calcula probabilidade condicional / likelihood de uma palavra para um tipo de recurso especifico
+        """
         for resource in prob_condit:
             for word in set_of_unique_words_all_docs:
                 p_word = prob_condit[resource][word]+1 if word in prob_condit[resource] else 1  # laplace smoothing
                 number_of_all_words_in_category = len(all_words_from_a_resource[resource])
-                number_unique_words_all_docs = len(set_of_unique_words_all_docs)
                 prob_condit[resource][word] = p_word/(number_of_all_words_in_category+number_unique_words_all_docs)
+        return prob_condit
 
-        self.classify_process(test, prob_condit, set_of_unique_words_all_docs, priori_prob_by_resource_types)
+    def classify(self, test, training):
+        """
+            Responsavel pelo treinamento e teste
+        """
 
-    def classify_process(self, test, prob_condit, unique_words, priori):
+        priori_prob_by_resource_types = self._get_probability_by_resource(training)
+        all_words_from_a_resource = self._get_all_words_from_each_resource(training)
+
+        set_of_unique_words_all_docs = set()
+        for i in all_words_from_a_resource:
+            set_of_unique_words_all_docs.update(all_words_from_a_resource[i])
+
+        word_counter = self._get_word_counter_by_resource_type(all_words_from_a_resource)
+
+        prob_condit = copy.deepcopy(word_counter)
+        number_unique_words_all_docs = len(set_of_unique_words_all_docs)
+
+        prob_condit = self._calculate_likelihood(
+                prob_condit,
+                set_of_unique_words_all_docs,
+                number_unique_words_all_docs,
+                all_words_from_a_resource
+        )
+        self._classify_test_set(test, prob_condit, set_of_unique_words_all_docs, priori_prob_by_resource_types)
+
+    def _classify_test_set(self, test, prob_condit, unique_words, priori):
+        """
+            Reponsavel por, dado um conjunto de teste, classificar os elementos
+        """
         probability = {}
         for task in test:
             probability[task.label] = {}
             for app_class in prob_condit:
-                label = self.clean_label(task.label)
+                label = self._clean_label(task.label)
                 probability[task.label][app_class] = priori[app_class]
 
                 # testa se palavras existem no vocabulario. se nenhuma existe coloca 0 de prob
@@ -117,7 +157,8 @@ class ServicesProfiles(object):
             max_val = 0
             class_value = ''
             for app in probability[label]:
-                # TODO aqui necessario colocar um threshold para nao pegar qlqr label
+                # TODO aqui talvez necessario colocar um threshold para nao pegar qlqr label (?) . ver se isso
+                # melhora de alguma forma / talvez nao
                 if probability[label][app] > max_val:
                     max_val = probability[label][app]
                     class_value = app
@@ -131,7 +172,7 @@ class ServicesProfiles(object):
                     task.save()
             # print('{}: {}'.format(label, class_value))
 
-    def clean_label(self, label):
+    def _clean_label(self, label):
         '''
             Returns a list of the words that compose the provided label
         '''
@@ -154,7 +195,7 @@ class ServicesProfiles(object):
             page = p.page(i+1)
             test = page.object_list
             training = all_tasks.filter(~Q(id__in=[task.id for task in test]))
-            self.classify_tasks(test, training)
+            self.classify(test, training)
             for t in test:
                 print('%-60s%-25s%-25s' % (t.label, t.application_type, t.recommended_app))
                 if t.recommended_app == t.application_type:
