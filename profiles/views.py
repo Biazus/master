@@ -38,6 +38,8 @@ class ProcessUpdate(UpdateView):
             training = [task for task in Task.objects.filter(process__organization=instance.organization) if
                     task not in test]
             service.recommend(test, training)
+        else:
+            return super(ProcessUpdate, self).post(self, request, *args, **kwargs)
         return redirect('profiles:process_list')
 
 
