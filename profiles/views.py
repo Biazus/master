@@ -32,12 +32,12 @@ class ProcessUpdate(UpdateView):
 
     def post(self, request, *args, **kwargs):
         instance = Process.objects.get(id=kwargs.get('pk'))
-        if 'recommend' in request.POST:
+        if 'classify_tasks' in request.POST:
             service = ServicesProfiles()
             test = [task for task in instance.task_set.all()]
             training = [task for task in Task.objects.filter(process__organization=instance.organization) if
                     task not in test]
-            service.recommend(test, training)
+            service.classify_tasks(test, training)
         else:
             return super(ProcessUpdate, self).post(self, request, *args, **kwargs)
         return redirect('profiles:process_list')

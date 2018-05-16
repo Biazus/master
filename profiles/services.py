@@ -4,7 +4,6 @@ import copy
 import xml.etree.ElementTree as ET
 from nltk.stem import RSLPStemmer
 from nltk.corpus import stopwords
-from random import shuffle
 
 from .models import Task
 
@@ -30,6 +29,9 @@ class ServicesProfiles(object):
         return instance.raw_file
 
     def _save_task(self, tag, attrib, instance):
+        """
+            Save the tasks as part of the instance
+        """
         task_types_map = {
                 'businessRuleTask': Task.BUSINESS_RULE_TASK,
                 'userTask': Task.USER_TASK,
@@ -45,9 +47,10 @@ class ServicesProfiles(object):
         label = attrib['name']
         Task.objects.create(label=label, task_type=task_type, process=instance)
 
-    def recommend(self, test, training):
+    def classify_tasks(self, test, training):
 
-        # calculate priori probability
+        """priori_prob_by_resource_types = dicionario que ira conter a probabilidade a priori de uma
+        palavra estar contida em um tipo de recurso """
         priori_prob_by_resource_types = {}
         for resource in ResourceType.objects.all():
             resource_task_count = resource.task_set.filter(id__in=[i.id for i in training]).count()
@@ -57,8 +60,10 @@ class ServicesProfiles(object):
         tasks_without_resource = len([task for task in training if task.application_type is None])
         for row in priori_prob_by_resource_types:
             priori_prob_by_resource_types[row] = priori_prob_by_resource_types[row] / task_count
-        priori_prob_by_resource_types['no_resources'] = tasks_without_resource/task_count
+        priori_prob_by_resource_types['undefined'] = tasks_without_resource/task_count
 
+        """all_words_from_a_resource = dicionario contendo, para cada um dos tipos de recurso R, as palavras -
+        ja limpas - contidas dentro das tarefas de R"""
         all_words_from_a_resource = {'undefined': []}
         for task in training:
             cleaned_label = self.clean_label(task.label)
@@ -66,43 +71,39 @@ class ServicesProfiles(object):
             all_words_from_a_resource.setdefault(application_name, [])
             all_words_from_a_resource[application_name] = all_words_from_a_resource[application_name] + cleaned_label
 
+        """set_of_unique_words_all_docs = set de todas as palavras dos processos da organizacao"""
         set_of_unique_words_all_docs = set()
         for i in all_words_from_a_resource:
-            # cria set a partir das palavras de cada resource type
             set_of_unique_words_all_docs.update(all_words_from_a_resource[i])
 
-        # adiciona as palavras do processo passado como instancia para o set
-        for task in training:
-            set_of_unique_words_all_docs.update(self.clean_label(task.label))
-
-        # calcular likelihood
+        """word_counter = numero de vezes em que uma dada palavra aparece para um tipo de recurso especifico"""
         word_counter = {}
         for resource in all_words_from_a_resource:
             word_counter[resource] = {}
             for word in all_words_from_a_resource[resource]:
                 word_counter[resource][word] = all_words_from_a_resource[resource].count(word)
 
+        """prob_condit = probabilidade condicional / likelihood de uma palavra para um dado tipo de recurso"""
         prob_condit = copy.deepcopy(word_counter)
         for resource in prob_condit:
             for word in set_of_unique_words_all_docs:
-                p_word = prob_condit[resource][word]+1 if word in prob_condit[resource] else 1 # laplace smoothing
+                p_word = prob_condit[resource][word]+1 if word in prob_condit[resource] else 1  # laplace smoothing
                 number_of_all_words_in_category = len(all_words_from_a_resource[resource])
                 number_unique_words_all_docs = len(set_of_unique_words_all_docs)
                 prob_condit[resource][word] = p_word/(number_of_all_words_in_category+number_unique_words_all_docs)
 
-        print(prob_condit)
-        self.classify_process(test, prob_condit, set_of_unique_words_all_docs)
+        self.classify_process(test, prob_condit, set_of_unique_words_all_docs, priori_prob_by_resource_types)
 
-    def classify_process(self, test, prob_condit, set_of_unique_words_all_docs):
+    def classify_process(self, test, prob_condit, unique_words, priori):
         probability = {}
         for task in test:
             probability[task.label] = {}
             for app_class in prob_condit:
                 label = self.clean_label(task.label)
-                probability[task.label][app_class] = 1
+                probability[task.label][app_class] = priori[app_class]
 
                 # testa se palavras existem no vocabulario. se nenhuma existe coloca 0 de prob
-                existent_words = [ i for i in label if i in set_of_unique_words_all_docs]
+                existent_words = [i for i in label if i in unique_words]
                 if len(existent_words) == 0:
                     probability[task.label][app_class] = 0
 
@@ -122,7 +123,7 @@ class ServicesProfiles(object):
                     class_value = app
             if class_value != '' and class_value != 'undefined':
                 tasks_to_update = [task for task in test if task.label == label]
-                # cleanup para checar se task é um servico
+                # cleanup para checar se task é um servico ou manual: se for, nao classifica
                 tasks_to_update = [task for task in tasks_to_update if task.task_type != 'service' and
                         task.task_type != 'manual']
                 for task in tasks_to_update:
@@ -153,7 +154,7 @@ class ServicesProfiles(object):
             page = p.page(i+1)
             test = page.object_list
             training = all_tasks.filter(~Q(id__in=[task.id for task in test]))
-            self.recommend(test, training)
+            self.classify_tasks(test, training)
             for t in test:
                 print('%-60s%-25s%-25s' % (t.label, t.application_type, t.recommended_app))
                 if t.recommended_app == t.application_type:
