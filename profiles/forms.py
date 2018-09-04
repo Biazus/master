@@ -9,4 +9,5 @@ class ProcessForm(forms.ModelForm):
         fields = ('name', 'organization', 'raw_file')
 
 
-TaskFormSet = modelformset_factory(Task, fields=('label', 'id', 'task_type', 'application_type', ), extra=0)
+TaskFormSet = modelformset_factory(Task, fields=('label', 'id', 'task_type', 'application_type',
+    'recommended_app', ), extra=0)

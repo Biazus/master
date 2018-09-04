@@ -133,7 +133,7 @@ class ServicesProfiles(object):
 
     def _classify_test_set(self, test, prob_condit, unique_words, priori):
         """
-            Reponsavel por, dado um conjunto de teste, classificar os elementos
+            Responsavel por, dado um conjunto de teste, classificar os elementos
         """
         probability = {}
         for task in test:
