@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h1>Resources</h1>
+  <a href="{% url "resources:resource_new" %}" class="btn btn-primary">Create New Resource</a>
+  <br>
+  <br>
+  <table class="table table-striped">
+    <tr>
+        <th>Name</th>
+        <th>Price</th>
+        <th>Collaborative</th>
+        <th>Open Source</th>
+        <th>Available at web</th>
+        <th>Multiplatform</th>
+        <th>Delete</th>
+    </tr>
+    {% for resource in object_list %}
+    <tr>
+        <td><a href="{% url "resources:resource_edit" resource.id %}">{{ resource.name }}</a></td>
+        {% if resource.price > 0 %}
+            <td> R${{ resource.price }} </td>
+        {% else %}
+            <td> Free </td>
+        {% endif %}
+        <td> {{ resource.collaborative|yesno:"Yes,No" }} </td>
+        <td> {{ resource.open_source|yesno:"Yes,No"  }} </td>
+        <td> {{ resource.available_web|yesno:"Yes,No"  }} </td>
+        <td> {{ resource.multiplatform|yesno:"Yes,No"  }} </td>
+        <td><a href="{% url "resources:resource_delete" resource.id %}">X</a></td>
+    </tr>
+  {% endfor %}
+  </table>
+  <br>
+{% endblock %}

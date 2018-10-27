@@ -2,28 +2,28 @@ from django.views.generic import ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.core.urlresolvers import reverse_lazy
 
-from .models import Product, ResourceType
+from .models import Resource, ResourceType
 
 
-class ProductCreate(CreateView):
-    model = Product
-    success_url = reverse_lazy('resources:product_list')
-    fields = ['name', 'price']
+class ResourceCreate(CreateView):
+    model = Resource
+    success_url = reverse_lazy('resources:resource_list')
+    fields = ['name', 'price', 'collaborative', 'open_source', 'available_web', 'multiplatform',]
 
 
-class ProductList(ListView):
-    model = Product
+class ResourceList(ListView):
+    model = Resource
 
 
-class ProductUpdate(UpdateView):
-    model = Product
-    success_url = reverse_lazy('resources:product_list')
-    fields = ['name', 'price']
+class ResourceUpdate(UpdateView):
+    model = Resource
+    success_url = reverse_lazy('resources:resource_list')
+    fields = ['name', 'price', 'collaborative', 'open_source', 'available_web', 'multiplatform',]
 
 
-class ProductDelete(DeleteView):
-    model = Product
-    success_url = reverse_lazy('resources:product_list')
+class ResourceDelete(DeleteView):
+    model = Resource
+    success_url = reverse_lazy('resources:resource_list')
 
 
 class ResourceTypeCreate(CreateView):

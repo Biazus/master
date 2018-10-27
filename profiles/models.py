@@ -6,7 +6,7 @@ from resources.models import ResourceType
 class Organization(models.Model):
     name = models.CharField(verbose_name='Name', max_length=30,)
     suite = models.ManyToManyField(
-        'resources.Product', verbose_name='Application Suite', blank=True,
+        'resources.Resource', verbose_name='Application Suite', blank=True,
     )
     accuracy = models.FloatField('Accuracy', blank=True, null=True,)
 
