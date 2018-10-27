@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
 {% block content %}
+{% if form.instance.id %}
 <h1>Process "{{form.instance.name}}"</h1>
+{% else %}
+<h1> New Process</h1>
+{% endif %}
   <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
@@ -14,7 +18,7 @@
             <th>Label</th>
             <th>Type</th>
             <th>Application Type</th>
-            <th>Classified Task Resources</th>
+            <th>Classified Application Type</th>
         </tr>
         {% for obj in form.instance.task_set.all %}
         <tr>

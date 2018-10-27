@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
 {% block content %}
-<h1>Organization "{{form.instance.name}}"</h1>
+{% if form.instance.id %}
+    <h1>Organization "{{form.instance.name}}"</h1>
+{% else %}
+    <h1>New Organization</h1>
+{% endif %}
 <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
