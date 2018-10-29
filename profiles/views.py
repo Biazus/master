@@ -8,6 +8,7 @@ from django.shortcuts import redirect, render
 
 from .models import Process, Task, Organization
 from .services import ServicesProfiles
+from resources.models import Resource
 
 
 class ProcessList(ListView):
@@ -81,11 +82,19 @@ class CrossValidation(View):
 
 
 class TasksEdit(View):
-    template = 'profiles/tasks_edit.html'
-    form_class = TaskFormSet
+
+    def __init__(self, *args, **kwargs):
+        self.template = 'profiles/tasks_edit.html'
+        self.form_class = TaskFormSet
+        return super(TasksEdit, self).__init__(*args, **kwargs)
 
     def get(self, request, *args, **kwargs):
-        form = self.form_class(queryset=Task.objects.filter(process_id=kwargs.pop('pk')))
+        process_id = kwargs.pop('pk')
+        process = Process.objects.get(id=process_id)
+        self.form_class.form.base_fields['resource'].queryset = Resource.objects.filter(
+                id__in=process.organization.suite.all().values('id')
+        )
+        form = self.form_class(queryset=Task.objects.filter(process_id=process_id))
         return render(request, self.template, {'form': form})
 
     def post(self, request, *args, **kwargs):

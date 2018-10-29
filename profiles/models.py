@@ -1,6 +1,6 @@
 from django.db import models
 
-from resources.models import ResourceType
+from resources.models import ResourceType, Resource
 
 
 class Organization(models.Model):
@@ -61,10 +61,17 @@ class Task(models.Model):
     label = models.CharField(verbose_name='Label', max_length=256)
     task_type = models.CharField(verbose_name='Type', choices=TASK_TYPES, max_length=20,)
     process = models.ForeignKey(Process, verbose_name='Task', on_delete=models.CASCADE)
+    resource = models.ForeignKey(
+        Resource, verbose_name='Resource', on_delete=models.SET_NULL, null=True, blank=True,
+    )
     application_type = models.ForeignKey(
         ResourceType, verbose_name='Application Type', on_delete=models.SET_NULL, null=True, blank=True,
     )
-    recommended_app = models.ForeignKey(
-        ResourceType, verbose_name='Recommended App', on_delete=models.SET_NULL, null=True, blank=True,
+    classified_type = models.ForeignKey(
+        ResourceType, verbose_name='Classified Type', on_delete=models.SET_NULL, null=True, blank=True,
         related_name='predicted_tasks'
+    )
+    recommended_resource = models.ForeignKey(
+        Resource, verbose_name='Recommended Resource', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='tasks_used_for_recommending'
     )

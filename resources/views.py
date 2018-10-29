@@ -8,7 +8,10 @@ from .models import Resource, ResourceType
 class ResourceCreate(CreateView):
     model = Resource
     success_url = reverse_lazy('resources:resource_list')
-    fields = ['name', 'price', 'collaborative', 'open_source', 'available_web', 'multiplatform',]
+    fields = [
+        'name', 'price', 'collaborative', 'open_source', 'available_web', 'multiplatform',
+        'resource_type',
+    ]
 
 
 class ResourceList(ListView):
@@ -18,7 +21,10 @@ class ResourceList(ListView):
 class ResourceUpdate(UpdateView):
     model = Resource
     success_url = reverse_lazy('resources:resource_list')
-    fields = ['name', 'price', 'collaborative', 'open_source', 'available_web', 'multiplatform',]
+    fields = [
+        'name', 'price', 'collaborative', 'open_source', 'available_web', 'multiplatform',
+        'resource_type',
+    ]
 
 
 class ResourceDelete(DeleteView):

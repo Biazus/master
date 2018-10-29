@@ -12,6 +12,7 @@
         <th>Open Source</th>
         <th>Available at web</th>
         <th>Multiplatform</th>
+        <th>Resource Type</th>
         <th>Delete</th>
     </tr>
     {% for resource in object_list %}
@@ -26,6 +27,7 @@
         <td> {{ resource.open_source|yesno:"Yes,No"  }} </td>
         <td> {{ resource.available_web|yesno:"Yes,No"  }} </td>
         <td> {{ resource.multiplatform|yesno:"Yes,No"  }} </td>
+        <td> {{ resource.resource_type }} </td>
         <td><a href="{% url "resources:resource_delete" resource.id %}">X</a></td>
     </tr>
   {% endfor %}

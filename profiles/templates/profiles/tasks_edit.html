@@ -1,14 +1,16 @@
 {% extends 'base.html' %}
 {% block content %}
-  <form method="post">
+  <form method="post" style="margin-top:30px">
     {% csrf_token %}
     {{ form.management_form }}
     {% for f in form %}
-      {{ f.instance.label }}
+    <b>{{ f.instance.label }}</b>
       <br>
-      {{ f }}
+      {% for i in f %}
+          <div style="margin-bottom:-16px">{{ i.label }}:  {{ i }} </div><br/>
+      {% endfor %}
       <br><br><br>
     {% endfor %}
-    <button type="submit">Submit!</button>
+    <button type="submit" style="margin-bottom: 100px">Submit!</button>
   </form>
 {% endblock %}

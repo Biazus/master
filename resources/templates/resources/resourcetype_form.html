@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
 {% block content %}
-<h1>Resource Type"{{form.instance.name}}"</h1>
+{% if form.instance.id %}
+    <h1>Resource Type"{{form.instance.name}}"</h1>
+{% else %}
+    <h1>New Resource Type</h1>
+{% endif %}
   <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}

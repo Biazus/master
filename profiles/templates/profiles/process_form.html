@@ -10,6 +10,7 @@
     {{ form.as_p }}
     <button class="btn btn-primary" type="submit">Submit!</button>
     <button class="btn btn-primary" type="submit" name="classify">Classify Tasks</button>
+    <button class="btn btn-primary" type="submit" name="recommend">Recommend Resources</button>
   </form>
     {% if form.instance.task_set.all %}
         <h3> Tasks </h3>
@@ -17,15 +18,19 @@
         <tr>
             <th>Label</th>
             <th>Type</th>
-            <th>Application Type</th>
-            <th>Classified Application Type</th>
+            <th>Resource </th>
+            <th>Resource Type</th>
+            <th>Classified Type</th>
+            <th>Recommended Resource</th>
         </tr>
         {% for obj in form.instance.task_set.all %}
         <tr>
             <td>{{ obj.label }}</td>
             <td>{{ obj.task_type }}</td>
+            <th>{{ obj.resource.name }}</th>
             <td>{{ obj.application_type|default:''}}</td>
-            <td>{{ obj.recommended_app|default:''}}</td>
+            <td>{{ obj.classified_type|default:''}}</td>
+            <td>{{ obj.recommended_resource|default:''}}</td>
         </tr>
         {% endfor %}
     </table>
