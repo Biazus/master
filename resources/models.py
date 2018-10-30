@@ -18,6 +18,7 @@ class Resource(models.Model):
     collaborative = models.BooleanField(default=False)
     available_web = models.BooleanField(default=False)
     multiplatform = models.BooleanField(default=False)
+    developed_inside = models.BooleanField(default=False)
     resource_type = models.ForeignKey(
         ResourceType, verbose_name='Resource Type', on_delete=models.SET_NULL, null=True, blank=True,
     )

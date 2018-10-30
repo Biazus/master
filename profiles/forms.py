@@ -11,6 +11,6 @@ class ProcessForm(forms.ModelForm):
 
 TaskFormSet = modelformset_factory(
     Task,
-    fields=('label', 'id', 'task_type', 'resource', 'application_type','classified_type', ),
+    fields=('label', 'id', 'task_type', 'resource', 'classified_type', ),
     extra=0
 )

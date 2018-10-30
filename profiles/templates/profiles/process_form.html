@@ -28,7 +28,7 @@
             <td>{{ obj.label }}</td>
             <td>{{ obj.task_type }}</td>
             <th>{{ obj.resource.name }}</th>
-            <td>{{ obj.application_type|default:''}}</td>
+            <td>{{ obj.resource.resource_type|default:''}}</td>
             <td>{{ obj.classified_type|default:''}}</td>
             <td>{{ obj.recommended_resource|default:''}}</td>
         </tr>

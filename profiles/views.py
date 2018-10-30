@@ -8,6 +8,7 @@ from django.shortcuts import redirect, render
 
 from .models import Process, Task, Organization
 from .services import ServicesProfiles
+from .recommender import Recommend
 from resources.models import Resource
 
 
@@ -39,6 +40,11 @@ class ProcessUpdate(UpdateView):
             training = [task for task in Task.objects.filter(process__organization=instance.organization) if
                     task not in test]
             service.classify(test, training)
+        elif 'recommend' in request.POST:
+            service = Recommend()
+            org_profile = service.create_organization_profile(instance)
+            service.get_most_similar_resource(org_profile, instance)
+
         else:
             return super(ProcessUpdate, self).post(self, request, *args, **kwargs)
         return redirect('profiles:process_list')
